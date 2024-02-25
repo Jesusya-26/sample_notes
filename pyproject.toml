@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "test-fastapi"
+version = "0.1.0"
+description = "This is a simple note-taking service"
+authors = ["Babayev Ruslan <rusl.babae@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+uvicorn = "^0.27.1"
+sqlalchemy = {version = "^2.0.27", extras = ["asyncio"]}
+loguru = "^0.7.2"
+alembic = "^1.13.1"
+psycopg2 = {version = "^2.9.9", extras = ["asyncio"]}
+asyncpg = "^0.29.0"
+fastapi = "0.100.0"
+
+
+[tool.poetry.scripts]
+main = "test-fastapi.__main__:main"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
