@@ -6,7 +6,7 @@ import pathlib
 import sys
 
 
-project_dir = pathlib.Path(__file__).resolve().parent.parent.parent
+project_dir = pathlib.Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(project_dir))
 from test_fastapi.utils.dotenv import try_load_envfile
 

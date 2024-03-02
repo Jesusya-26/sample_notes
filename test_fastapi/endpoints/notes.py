@@ -75,7 +75,7 @@ async def get_note_by_id(
     return NoteResponse.from_dto(note)
 
 
-@notes_router.post(
+@notes_router.patch(
     "/{note_id}",
     response_model=NoteResponse,
     status_code=status.HTTP_200_OK
@@ -107,12 +107,12 @@ async def update_note(
 @notes_router.delete(
     "/{note_id}",
     response_model=None,
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
 )
 async def delete_note(
         note_id: int,
         session: AsyncConnection = Depends(get_connection)
-) -> None:
+) -> dict:
     """Delete note by id
 
     Args:
@@ -121,3 +121,5 @@ async def delete_note(
     """
 
     await crud.delete(session, note_id)
+
+    return {"result": "deleted"}

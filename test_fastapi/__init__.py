@@ -1,4 +1,5 @@
 """
 "This is a simple note-taking service"
 """
-__version__ = "0.1.0"
+
+from test_fastapi.fastapi_init import app
