@@ -10,9 +10,6 @@ from test_fastapi.db.connection.session import SessionManager
 from test_fastapi.endpoints import list_of_routes
 
 
-LAST_UPDATE = "2024-02-22"
-
-
 def bind_routes(application: FastAPI, prefix: str) -> None:
     """
     Bind all routes to application.
