@@ -7,7 +7,7 @@ from starlette import status
 
 from test_fastapi.db.connection import get_connection
 from test_fastapi.logic import NoteCRUD
-from test_fastapi.schemas import NoteResponse, NotesResponse, NoteRequest
+from test_fastapi.schemas import NoteResponse, NotesResponse, NotePostRequest, NotePatchRequest
 
 from .routers import notes_router
 
@@ -36,13 +36,13 @@ async def get_all_notes(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_note(
-        note_data: NoteRequest,
+        note_data: NotePostRequest,
         session: AsyncConnection = Depends(get_connection)
 ) -> NoteResponse:
     """API endpoint for creating a note resource
 
     Args:
-        note_data (NoteRequest): crud for creating a note using the note schema
+        note_data (NotePostRequest): crud for creating a note using the note schema
 
     Returns:
         NoteResponse: note that has been created
@@ -75,31 +75,52 @@ async def get_note_by_id(
     return NoteResponse.from_dto(note)
 
 
+@notes_router.put(
+    "/{note_id}",
+    response_model=NoteResponse,
+    status_code=status.HTTP_200_OK
+)
+async def update_full_note(
+        note_id: int,
+        data: NotePostRequest,
+        session: AsyncConnection = Depends(get_connection)
+) -> NoteResponse:
+    """Update full note by ID
+
+    Args:
+        note_id (str): ID of note to update
+        data (NotePostRequest): crud to update note
+
+    Returns:
+        dict: the updated note
+    """
+    note = await crud.update_full(session, note_id, data={"title": data.title,
+                                                          "content": data.content})
+
+    return NoteResponse.from_dto(note)
+
+
 @notes_router.patch(
     "/{note_id}",
     response_model=NoteResponse,
     status_code=status.HTTP_200_OK
 )
-async def update_note(
+async def update_part_note(
         note_id: int,
-        data: NoteRequest,
+        data: NotePatchRequest,
         session: AsyncConnection = Depends(get_connection)
 ) -> NoteResponse:
-    """Update by ID
+    """Update the title or content (or both) by ID
 
     Args:
         note_id (str): ID of note to update
-        data (NoteRequest): crud to update note
+        data (NotePostRequest): crud to update note
 
     Returns:
         dict: the updated note
     """
-    note = await crud.update(
-        session,
-        note_id,
-        data={"title": data.title,
-              "content": data.content}
-    )
+    note = await crud.update_part(session, note_id, data={"title": data.title,
+                                                          "content": data.content})
 
     return NoteResponse.from_dto(note)
 

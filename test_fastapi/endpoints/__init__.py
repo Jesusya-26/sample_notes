@@ -8,7 +8,7 @@ from .routers import routers_list
 
 
 for file in sorted(Path(__file__).resolve().parent.iterdir()):
-    if file.name.endswith(".py") and file.name not in ("dotenv.py", "routers.py"):
+    if file.name.endswith(".py"):
         importlib.import_module(f".{file.name[:-3]}", __package__)
 
 

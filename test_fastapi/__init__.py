@@ -2,4 +2,5 @@
 "This is a simple note-taking service"
 """
 
-from test_fastapi.fastapi_init import app
+from .fastapi_init import app
+from .version import VERSION as __version__

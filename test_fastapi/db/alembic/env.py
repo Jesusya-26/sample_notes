@@ -32,7 +32,7 @@ from test_fastapi.db.entities import *
 config = context.config
 section = config.config_ini_section
 
-app_settings.update(AppSettings.try_from_env())
+app_settings.update_full(AppSettings.try_from_env(),,
 
 config.set_section_option(section, "POSTGRES_DB", app_settings.db_name)
 config.set_section_option(section, "POSTGRES_HOST", app_settings.db_addr)

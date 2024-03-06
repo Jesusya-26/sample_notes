@@ -1,2 +1,2 @@
-__version__ = "0.1.0"
-LAST_UPDATE = "2024-02-22"
+VERSION = "0.1.1"
+LAST_UPDATE = "2024-03-06"

@@ -1,13 +1,15 @@
 import traceback
+import itertools
 
 from loguru import logger
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from test_fastapi.version import __version__, LAST_UPDATE
-from test_fastapi.db.connection.session import SessionManager
-from test_fastapi.endpoints import list_of_routes
+from .version import VERSION, LAST_UPDATE
+from .db.connection.session import SessionManager
+from .endpoints import list_of_routes
+from .config.app_settings_global import app_settings
 
 
 def bind_routes(application: FastAPI, prefix: str) -> None:
@@ -29,7 +31,7 @@ def get_app(prefix: str = "/api") -> FastAPI:
         description=description,
         docs_url="/api/docs",
         openapi_url="/api/openapi",
-        version=f"{__version__} ({LAST_UPDATE})",
+        version=f"{VERSION} ({LAST_UPDATE})",
     )
     bind_routes(application, prefix)
 

@@ -7,9 +7,9 @@ import uvicorn
 
 from loguru import logger
 
-from test_fastapi.config import AppSettings
-from test_fastapi.config.app_settings_global import app_settings
-from test_fastapi.utils.dotenv import try_load_envfile
+from .config import AppSettings
+from .config.app_settings_global import app_settings
+from .utils.dotenv import try_load_envfile
 
 
 LogLevel = tp.Literal["TRACE", "DEBUG", "INFO", "WARNING", "ERROR"]
