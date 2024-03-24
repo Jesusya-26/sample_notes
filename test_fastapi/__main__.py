@@ -168,14 +168,14 @@ def main(
     if __name__ in ("__main__", "test_fastapi.__main__"):
         if debug:
             uvicorn.run(
-                "test_fastapi.__init__:app",
+                "test_fastapi:app",
                 host=host,
                 port=port,
                 reload=True,
                 log_level=logger_verbosity.lower()
             )
         else:
-            uvicorn.run("test_fastapi.__init__:app",
+            uvicorn.run("test_fastapi:app",
                         host=host,
                         port=port,
                         log_level=logger_verbosity.lower()

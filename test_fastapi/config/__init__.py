@@ -5,6 +5,8 @@ import os
 from dataclasses import dataclass
 from loguru import logger
 
+from test_fastapi import __version__ as api_version
+
 
 @dataclass
 class AppSettings:
@@ -23,7 +25,12 @@ class AppSettings:
     debug: bool = False
     db_connect_retry: int = 20
     db_pool_size: int = 15
-    application_name = "notes_db"
+    jwt_secret_key: str = (
+        "this key will be used to sign JWTs, do not update it as all of the users current authorizations will fail"
+    )
+    jwt_access_token_exp_time: int = 3 * 24 * 60 * 60  # in seconds = 3 days
+    jwt_refresh_token_exp_time: int = 3 * 30 * 24 * 60 * 60  # in seconds = 3 months
+    application_name = f"notes_api ({api_version})"
 
     @property
     def database_settings(self) -> dict[str, str | int]:
