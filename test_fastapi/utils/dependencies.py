@@ -54,5 +54,6 @@ async def user_dependency(
 
     Ensures that User is approved to log in and valid.
     """
+
     return await get_user_info(access_token.get('sub'), access_token.get('username'),
                                access_token.get('email'), access_token.get('created_at'))
