@@ -1,7 +1,6 @@
 """
 Authorization logic is defined here.
 """
-
 from test_fastapi.dto.users import TokensTuple
 from test_fastapi.utils.dependencies import keycloak_openid
 

@@ -11,7 +11,7 @@ class User:
     Full User data transfer object, but without password_hash.
     """
 
-    id: int
+    id: str
     username: str
     email: str
     registered_at: datetime
