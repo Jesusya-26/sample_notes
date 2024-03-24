@@ -16,11 +16,12 @@ class RegistrationRequest(BaseModel):
     Request body class given as a request for user registration endpoint.
     """
 
+    username: str
     email: str
     password: str
 
     @validator("email")
-    def validate_email(email: str):
+    def validate_username(email: str):
         """
         Validate email with regular expression.
         """

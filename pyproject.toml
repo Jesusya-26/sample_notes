@@ -17,6 +17,7 @@ asyncio = "^3.4.3"
 pydantic = "^2.6.4"
 python-multipart = "^0.0.9"
 pyjwt = "^2.8.0"
+python-keycloak = "^3.9.1"
 
 
 [tool.poetry.scripts]

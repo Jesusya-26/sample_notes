@@ -13,7 +13,7 @@ notes = Table(
     Column("title", String, nullable=False),
     Column("content", Text, nullable=False),
     Column("date_created", TIMESTAMP(timezone=True), server_default=func.now(), nullable=False),
-    Column("user_id", Integer, ForeignKey("users.users.id"), nullable=False)
+    Column("user_id", String, nullable=False)
 )
 
 """

@@ -25,11 +25,20 @@ class AppSettings:
     debug: bool = False
     db_connect_retry: int = 20
     db_pool_size: int = 15
-    jwt_secret_key: str = (
-        "this key will be used to sign JWTs, do not update it as all of the users current authorizations will fail"
-    )
-    jwt_access_token_exp_time: int = 3 * 24 * 60 * 60  # in seconds = 3 days
-    jwt_refresh_token_exp_time: int = 3 * 30 * 24 * 60 * 60  # in seconds = 3 months
+    # jwt_secret_key: str = (
+    #     "this key will be used to sign JWTs, do not update it "
+    #     "as all of the users current authorizations will fail"
+    # )
+    # jwt_access_token_exp_time: int = 3 * 24 * 60 * 60  # in seconds = 3 days
+    # jwt_refresh_token_exp_time: int = 3 * 30 * 24 * 60 * 60  # in seconds = 3 months
+    server_url: str = "http://localhost:8080/"
+    realm: str = "test"
+    client_id: str = "notesAPI"
+    client_secret: str = ""
+    authorization_url: str = "http://localhost:8080/realms/test/protocol/openid-connect/auth"
+    token_url: str = "http://localhost:8080/realms/test/protocol/openid-connect/token"
+    keycloak_admin: str = "admin"
+    keycloak_admin_sercet: str = "admin"
     application_name = f"notes_api ({api_version})"
 
     @property

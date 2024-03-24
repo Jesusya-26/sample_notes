@@ -2,23 +2,28 @@
 Registration logic is defined here.
 """
 from loguru import logger
-from sqlalchemy import exists, insert
-from sqlalchemy.ext.asyncio import AsyncConnection
+from keycloak import KeycloakAdmin
 
-from test_fastapi.db.entities.users import users
-from test_fastapi.exceptions.logic.users import UserExistsError
-from test_fastapi.utils.cryptography import hash_password
+from test_fastapi.config.app_settings_global import app_settings
 
 
-async def register(conn: AsyncConnection, email: str, password: str) -> None:
+async def register(username: str, email: str, password: str) -> None:
     """
     Register a user if the given email, login and password if email and login are both available.
     """
-    statement = exists(1).where(users.c.email == email).select()
-    user_exists = (await conn.execute(statement)).scalar()
-    if user_exists:
-        raise UserExistsError(email)
-    statement = insert(users).values(email=email, password_hash=hash_password(email, password))
-    await conn.execute(statement)
-    logger.info("Registered user {}", email)
-    await conn.commit()
+
+    admin = KeycloakAdmin(
+            server_url=app_settings.server_url,
+            username=app_settings.keycloak_admin,
+            password=app_settings.keycloak_admin_sercet,
+            realm_name=app_settings.realm,
+            user_realm_name=app_settings.realm)
+
+    admin.create_user({"email": email,
+                       "username": username,
+                       "enabled": True,
+                       "credentials": [{"value": password, "type": "password", }]},
+                      exist_ok=False)
+
+    logger.info("Registered user {}", username)
+

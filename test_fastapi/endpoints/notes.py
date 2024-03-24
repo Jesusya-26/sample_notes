@@ -9,7 +9,7 @@ from test_fastapi.db.connection import get_connection
 from test_fastapi.logic import NoteCRUD
 from test_fastapi.schemas import NoteResponse, NotesResponse, NotePostRequest, NotePatchRequest
 from test_fastapi.dto.users import User
-from test_fastapi.utils.dependencies import user_dependency
+from test_fastapi.utils.dependencies import get_user_info as user_dependency
 
 
 from .routers import notes_router

@@ -12,10 +12,9 @@ class User:
     """
 
     id: int
+    username: str
     email: str
-    is_approved: bool
     registered_at: datetime
-    device: str | None = None
 
     def __str__(self) -> str:
-        return f"(id={self.id}, email: {self.email}, device={self.device})"
+        return f"(id={self.id}, username: {self.username}"

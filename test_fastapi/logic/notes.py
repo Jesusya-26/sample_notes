@@ -57,11 +57,7 @@ class NoteCRUD:
         """
         Get note by id
         """
-        statement = (select(notes.c.id,
-                            notes.c.title,
-                            notes.c.content,
-                            notes.c.date_created).
-                     where(notes.c.id == note_id))
+        statement = (select(notes).where(notes.c.id == note_id))
         result = (await session.execute(statement)).first()
 
         if result is None:
@@ -69,7 +65,7 @@ class NoteCRUD:
         if result.user_id != user_id:
             raise EntityOwnerError(note_id, 'note')
 
-        return NoteDto(*result)
+        return NoteDto(*result[:-1])
 
     async def update_full(
             self,
