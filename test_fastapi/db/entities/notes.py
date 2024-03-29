@@ -5,7 +5,6 @@ from sqlalchemy import Table, Column, Integer, String, Text, TIMESTAMP, Identity
 
 from test_fastapi.db import metadata
 
-
 notes = Table(
     "notes",
     metadata,
@@ -22,4 +21,5 @@ Notes:
 - title str
 - content str
 - date_created datetime 
+- user_id str
 """

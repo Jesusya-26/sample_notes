@@ -1,17 +1,24 @@
 """
 FastApi dependencies are defined here.
 """
-from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException, status, Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi_cache.coder import JsonCoder
+from fastapi_cache.decorator import cache
+from sqlalchemy.ext.asyncio import AsyncConnection
+from sqlalchemy import select, insert
 from keycloak import KeycloakOpenID
+from typing import Annotated
 
-from test_fastapi.logic.users.user_info import get_user_info
-from test_fastapi.dto.users import User as UserDTO
+from test_fastapi.db.connection import get_connection
+from test_fastapi.db.entities.users import users
+from test_fastapi.dto.users import UserDTO
 from test_fastapi.config.app_settings_global import app_settings
+from test_fastapi.utils.key_builder import my_key_builder
 
 
 keycloak_openid = KeycloakOpenID(
-    server_url=app_settings.server_url,
+    server_url=app_settings.keycloak_server_url,
     client_id=app_settings.client_id,
     realm_name=app_settings.realm,
     client_secret_key=app_settings.client_secret,
@@ -27,10 +34,13 @@ async def get_idp_public_key():
     )
 
 
-async def access_token_dependency(token: OAuth2PasswordBearer(tokenUrl="/api/login") = Depends()) -> dict:
+# @cache(expire=60*10, coder=JsonCoder, key_builder=my_key_builder)
+async def access_token_dependency(
+        access_token: Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer())],
+) -> dict:
     try:
         return keycloak_openid.decode_token(
-            token,
+            access_token.credentials,
             key=await get_idp_public_key(),
             options={
                 "verify_signature": True,
@@ -47,7 +57,8 @@ async def access_token_dependency(token: OAuth2PasswordBearer(tokenUrl="/api/log
 
 
 async def user_dependency(
-    access_token: dict = Depends(access_token_dependency)
+    payload: dict = Depends(access_token_dependency),
+    conn: AsyncConnection = Depends(get_connection),
 ) -> UserDTO:
     """
     Return user fetched from the database by email from a validated access token.
@@ -55,5 +66,26 @@ async def user_dependency(
     Ensures that User is approved to log in and valid.
     """
 
-    return await get_user_info(access_token.get('sub'), access_token.get('username'),
-                               access_token.get('email'), access_token.get('created_at'))
+    statement = (select(users.c.is_banned).
+                 where(users.c.id == payload.get('sub')))
+    is_banned = (await conn.execute(statement)).fetchone()
+
+    if is_banned is None:
+        statement = insert(users).values(id=payload.get('sub')).returning(users.c.is_banned)
+        is_banned = list(await conn.execute(statement))[0]
+        await conn.commit()
+
+    try:
+        return UserDTO(
+            id=payload.get('sub'),
+            username=payload.get('username'),
+            email=payload.get('email'),
+            roles=list(payload.get("realm_access", {}).get("roles", [])),
+            is_banned=bool(*is_banned)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),  # "Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

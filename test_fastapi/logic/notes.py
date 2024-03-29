@@ -6,31 +6,38 @@ from sqlalchemy import select, insert, update, delete
 
 from test_fastapi.exceptions.logic.common import EntityNotFoundById, EntityOwnerError
 from test_fastapi.db.entities.notes import notes
-from test_fastapi.dto import NoteDto
+from test_fastapi.dto import NoteDto, UserDTO
 from test_fastapi.schemas import NotePostRequest
 
 
 class NoteCRUD:
     async def get_all(
             self,
-            user_id: int,
+            user: UserDTO,
             session: AsyncConnection
     ) -> list[NoteDto]:
         """
         Get all note objects from crud
         """
-        statement = (select(notes.c.id,
-                            notes.c.title,
-                            notes.c.content,
-                            notes.c.date_created).
-                     filter(notes.c.user_id == user_id).
-                     order_by(notes.c.id))
+        if "admin" in user.roles:
+            statement = (select(notes.c.id,
+                                notes.c.title,
+                                notes.c.content,
+                                notes.c.date_created).
+                         order_by(notes.c.id))
+        else:
+            statement = (select(notes.c.id,
+                                notes.c.title,
+                                notes.c.content,
+                                notes.c.date_created).
+                         filter(notes.c.user_id == user.id).
+                         order_by(notes.c.id))
 
         return [NoteDto(*data) for data in await session.execute(statement)]
 
     async def add(
             self,
-            user_id: int,
+            user: UserDTO,
             session: AsyncConnection,
             note: NotePostRequest
     ) -> NoteDto:
@@ -40,7 +47,7 @@ class NoteCRUD:
         statement = insert(notes).values(
             title=note.title,
             content=note.content,
-            user_id=user_id
+            user_id=user.id
         ).returning(notes.c.id, notes.c.title, notes.c.content, notes.c.date_created)
 
         result = list(await session.execute(statement))[0]
@@ -50,7 +57,7 @@ class NoteCRUD:
 
     async def get_by_id(
             self,
-            user_id: int,
+            user: UserDTO,
             session: AsyncConnection,
             note_id: int
     ) -> NoteDto:
@@ -62,14 +69,14 @@ class NoteCRUD:
 
         if result is None:
             raise EntityNotFoundById(note_id, 'note')
-        if result.user_id != user_id:
+        if result.user_id != user.id and "admin" not in user.roles:
             raise EntityOwnerError(note_id, 'note')
 
         return NoteDto(*result[:-1])
 
     async def update_full(
             self,
-            user_id: int,
+            user: UserDTO,
             session: AsyncConnection,
             note_id: int,
             data: dict
@@ -83,7 +90,7 @@ class NoteCRUD:
 
         if result is None:
             raise EntityNotFoundById(note_id, 'note')
-        if result.user_id != user_id:
+        if result.user_id != user.id and "admin" not in user.roles:
             raise EntityOwnerError(note_id, 'note')
 
         statement = (update(notes)
@@ -99,7 +106,7 @@ class NoteCRUD:
 
     async def update_part(
             self,
-            user_id: int,
+            user: UserDTO,
             session: AsyncConnection,
             note_id: int,
             data: dict
@@ -113,7 +120,7 @@ class NoteCRUD:
 
         if result is None:
             raise EntityNotFoundById(note_id, 'note')
-        if result.user_id != user_id:
+        if result.user_id != user.id and "admin" not in user.roles:
             raise EntityOwnerError(note_id, 'note')
 
         statement = (update(notes).
@@ -132,7 +139,7 @@ class NoteCRUD:
 
     async def delete(
             self,
-            user_id: int,
+            user: UserDTO,
             session: AsyncConnection,
             note_id: int
     ) -> None:
@@ -145,7 +152,7 @@ class NoteCRUD:
 
         if result is None:
             raise EntityNotFoundById(note_id, 'note')
-        if result.user_id != user_id:
+        if result.user_id != user.id and "admin" not in user.roles:
             raise EntityOwnerError(note_id, 'note')
 
         statement = delete(notes).where(notes.c.id == note_id)

@@ -1,2 +1,2 @@
 from .authorization import TokensTuple
-from .users import User
+from .users import UserDTO

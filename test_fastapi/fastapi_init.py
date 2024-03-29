@@ -5,6 +5,8 @@ from loguru import logger
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 
 from .version import VERSION, LAST_UPDATE
 from .db.connection.session import SessionManager
@@ -93,6 +95,7 @@ async def startup_event():
     Function that runs on an application startup. Database connection pool is initialized here.
     """
     await SessionManager().refresh()
+    FastAPICache.init(InMemoryBackend())
 
 
 @app.on_event("shutdown")
