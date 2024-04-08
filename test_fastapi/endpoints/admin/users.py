@@ -29,18 +29,14 @@ async def get_user_notes(
         user_id: string
     """
 
-    if 'user' in user.roles:
+    if 'admin' not in user.roles:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access is denied")
 
-    if 'admin' in user.roles:
-        notes = await get_all_notes(user_id, session)
-        return NotesResponse.from_dtos(notes)
-
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                        detail="Your account is not fully configured")
+    notes = await get_all_notes(user_id, session)
+    return NotesResponse.from_dtos(notes)
 
 
-@admin_data_router.get(
+@admin_data_router.post(
     "/activate",
     status_code=status.HTTP_200_OK,
 )
@@ -55,22 +51,18 @@ async def activate_user(
         user_id: string
     """
 
-    if 'user' in user.roles:
+    if 'admin' not in user.roles:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access is denied")
 
-    if 'admin' in user.roles:
-        try:
-            await activate(user_id, session)
-            return {"result": f"User with id={user_id} is active"}
-        except ValueError as e:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=str(e))
-
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                        detail="Your account is not fully configured")
+    try:
+        await activate(user_id, session)
+        return {"result": f"User with id={user_id} is active"}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=str(e))
 
 
-@admin_data_router.get(
+@admin_data_router.post(
     "/deactivate",
     status_code=status.HTTP_200_OK,
 )
@@ -85,16 +77,12 @@ async def deactivate_user(
         user_id: string
     """
 
-    if 'user' in user.roles:
+    if 'admin' not in user.roles:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access is denied")
 
-    if 'admin' in user.roles:
-        try:
-            await deactivate(user_id, session)
-            return {"result": f"User with id={user_id} was blocked"}
-        except ValueError as e:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=str(e))
-
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                        detail="Your account is not fully configured")
+    try:
+        await deactivate(user_id, session)
+        return {"result": f"User with id={user_id} was blocked"}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=str(e))

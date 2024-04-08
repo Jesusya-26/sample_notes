@@ -95,7 +95,7 @@ async def startup_event():
     Function that runs on an application startup. Database connection pool is initialized here.
     """
     await SessionManager().refresh()
-    FastAPICache.init(InMemoryBackend())
+    # FastAPICache.init(InMemoryBackend())
 
 
 @app.on_event("shutdown")

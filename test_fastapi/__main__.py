@@ -37,7 +37,7 @@ def logger_from_str(logger_text: str) -> list[tuple[LogLevel, str]]:
     "--db_addr",
     "-H",
     envvar="DB_ADDR",
-    default="localhost",
+    default="notes_db",
     show_default=True,
     show_envvar=True,
     help="Postgres DBMS address",
@@ -102,7 +102,7 @@ def logger_from_str(logger_text: str) -> list[tuple[LogLevel, str]]:
 @click.option(
     "--host",
     envvar="HOST",
-    default="127.0.0.1",
+    default="0.0.0.0",
     show_default=True,
     show_envvar=True,
     help="Service HOST address",

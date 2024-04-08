@@ -1,0 +1,68 @@
+version: "3.9"
+services:
+  notes_db:
+    container_name: ${POSTGRES_CONTAINER_NAME:-notes_db}
+    image: library/postgres:${KC_POSTGRES_IMAGE_TAG:-15}
+    restart: on-failure
+    env_file:
+      - ./db.env
+    healthcheck:
+      test: pg_isready -d postgres
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ports:
+      - ${POSTGRES_PORT_MAPPING:-5432}:5432
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - ./.env
+    environment:
+      - DEBUG
+    depends_on:
+      notes_db:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8000/health_check/ping || exit 1
+      interval: 10s
+      timeout: 5s
+      start_period: 5s
+    restart: on-failure
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:20.0.2
+    command:
+      - start --auto-build --db postgres --hostname-strict-https false --hostname-strict false --proxy edge --http-enabled true --import-realm --spi-user-profile-legacy-user-profile-read-only-attributes *_RES_ACCESS_MODE
+    env_file:
+      - ./keycloak.env
+    volumes:
+      - ./kc_data:/opt/keycloak/data/
+      - type: bind
+        source: ./kc_data/import/realm-export.json
+        target: /opt/keycloak/data/import/realm-export.json
+        read_only: true
+    ports:
+      - "8080:8080"
+    depends_on:
+      notes_db:
+        condition: service_healthy
+      api:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/realms/master"]
+      start_period: 10s
+      interval: 30s
+      retries: 3
+      timeout: 5s

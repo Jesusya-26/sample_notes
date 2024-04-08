@@ -5,7 +5,7 @@
 __pycache__/
 
 # Ignore environment-specific settings
-.env
+*.env
 .venv/
 
 # Ignore editor-specific files

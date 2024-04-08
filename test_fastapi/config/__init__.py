@@ -14,10 +14,10 @@ class AppSettings:
     Configuration class for application.
     """
 
-    host: str = "127.0.0.1"
+    host: str = "0.0.0.0"
     port: int = 8000
 
-    db_addr: str = "localhost"
+    db_addr: str = "notes_db"
     db_port: int = 5432
     db_name: str = "notes_db"
     db_user: str = "postgres"
@@ -29,9 +29,13 @@ class AppSettings:
     realm: str = "test"
     client_id: str = "notesAPI"
     client_secret: str = ""
-    authorization_url: str = f"realms/{realm}/protocol/openid-connect/auth"
-    token_url: str = f"/realms/{realm}/protocol/openid-connect/token"
+    _authorization_url: str = f"realms/{realm}/protocol/openid-connect/auth"
+    _token_url: str = f"/realms/{realm}/protocol/openid-connect/token"
     application_name = f"notes_api ({api_version})"
+
+    def __post_init__(self):
+        self._authorization_url = self._authorization_url.format(realm=self.realm)
+        self._token_url = self._token_url.format(realm=self.realm)
 
     @property
     def database_settings(self) -> dict[str, str | int]:
@@ -51,7 +55,7 @@ class AppSettings:
         """
         Get uri for connection with database.
         """
-        return ("postgresql+asyncpg://{user}:{password}@localhost/{database}".format(
+        return ("postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}".format(
             **self.database_settings))
 
     @property
@@ -59,7 +63,7 @@ class AppSettings:
         """
         Get uri for connection with database.
         """
-        return "postgresql://{user}:{password}@localhost/{database}".format(**self.database_settings)
+        return "postgresql://{user}:{password}@{host}:{port}/{database}".format(**self.database_settings)
 
     @classmethod
     def try_from_env(cls) -> "AppSettings":
