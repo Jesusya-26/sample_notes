@@ -1,20 +1,19 @@
 """
 FastApi dependencies are defined here.
 """
+import asyncio
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastapi_cache.coder import JsonCoder
-from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncConnection
 from sqlalchemy import select, insert
 from keycloak import KeycloakOpenID
 from typing import Annotated
+from cachetools import TTLCache
 
 from test_fastapi.db.connection import get_connection
 from test_fastapi.db.entities.users import users
 from test_fastapi.dto.users import UserDTO
 from test_fastapi.config.app_settings_global import app_settings
-from test_fastapi.utils.key_builder import my_key_builder
 
 
 keycloak_openid = KeycloakOpenID(
@@ -25,6 +24,8 @@ keycloak_openid = KeycloakOpenID(
     verify=True,
 )
 
+cache = TTLCache(maxsize=100, ttl=60)
+
 
 async def get_idp_public_key():
     return (
@@ -34,12 +35,17 @@ async def get_idp_public_key():
     )
 
 
-# @cache(expire=60*10, coder=JsonCoder, key_builder=my_key_builder)
 async def access_token_dependency(
         access_token: Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer())],
 ) -> dict:
+
+    result = cache.get(access_token.credentials)
+    if result is not None:
+        print(f"Found it in cache for token {access_token.credentials}")
+        return result
+
     try:
-        return keycloak_openid.decode_token(
+        result = keycloak_openid.decode_token(
             access_token.credentials,
             key=await get_idp_public_key(),
             options={
@@ -48,6 +54,13 @@ async def access_token_dependency(
                 "exp": True
             }
         )
+        await asyncio.sleep(5)
+
+        # Store the result in the cache
+        cache[access_token.credentials] = result
+
+        return result
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

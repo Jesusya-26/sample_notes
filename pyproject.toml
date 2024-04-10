@@ -12,13 +12,14 @@ sqlalchemy = {version = "^2.0.27", extras = ["asyncio"]}
 loguru = "^0.7.2"
 alembic = "^1.13.1"
 asyncpg = "^0.29.0"
-fastapi = "0.100.0"
 asyncio = "^3.4.3"
 pydantic = "^2.6.4"
 python-multipart = "^0.0.9"
 pyjwt = "^2.8.0"
 python-keycloak = "^3.9.1"
-fastapi-cache2 = "^0.2.1"
+orjson = "^3.10.0"
+fastapi = "^0.110.1"
+cachetools = "^5.3.3"
 
 
 [tool.poetry.scripts]

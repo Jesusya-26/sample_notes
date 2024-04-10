@@ -48,7 +48,7 @@ class SessionManager:
             app_settings.database_uri,
             future=True,
             pool_size=min(2, app_settings.db_pool_size - 5),
-            max_overflow=5
+            max_overflow=5,
         )
         async with self.engine.connect() as conn:
             cur = await conn.execute(select(1))
