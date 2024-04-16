@@ -1,11 +1,11 @@
 # Notes API
 
-This is a simple note-taking service based on **FastAPI**, **SQLAlchemy** (AsyncPG) and **Keycloak**.
+This is a simple note-taking service based on **FastAPI**, **PostgreSQL** and **Keycloak**.
 
 # Running locally
 
 ## preparation
-
+P
 1. To install python dependencies
   run `poetry install`. You may also want to use `venv` before that.
 2. Prepare a PostgreSQL Server to store the database.
