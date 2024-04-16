@@ -5,7 +5,7 @@ This is a simple note-taking service based on **FastAPI**, **PostgreSQL** and **
 # Running locally
 
 ## preparation
-P
+
 1. To install python dependencies
   run `poetry install`. You may also want to use `venv` before that.
 2. Prepare a PostgreSQL Server to store the database.
