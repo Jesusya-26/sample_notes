@@ -1,34 +1,32 @@
-name: Deploy to Server
-
+name: Build & Deploy
 on:
   push:
-    branches:
-      - master
-  pull_request:
     branches:
       - master
 
 jobs:
   deploy:
-    name: Deploy Application
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Checkout the code from the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # 2. Set up SSH
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.8.0
+      - name: Pull New Changes
+        uses: appleboy/ssh-action@v0.1.5
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          port: 22
+          username: ${{ secrets.SSH_USER}}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.PROJECT_DIR }}
+            git pull origin master
 
-      # 3. Deploy to the remote server
-      - name: Deploy to Remote Server
-        run: |
-          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ${{ secrets.PROJECT_FOLDER }}
-            sudo git pull
-            sudo docker compose up -d --build
-          EOF
+      - name: Deploy Backend
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: 22
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+          script: |
+            cd ${{ secrets.PROJECT_DIR }}
+            docker compose up -d --build
