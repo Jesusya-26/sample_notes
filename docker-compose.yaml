@@ -60,10 +60,10 @@ services:
       - ./keycloak.env
     volumes:
       - ./kc_data:/opt/keycloak/data/
-      - type: bind
-        source: ./kc_data/import/realm-export.json
-        target: /opt/keycloak/data/import/realm-export.json
-        read_only: true
+#      - type: bind
+#        source: ./kc_data/import/realm-export.json
+#        target: /opt/keycloak/data/import/realm-export.json
+#        read_only: true
     depends_on:
       api:
         condition: service_started
