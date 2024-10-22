@@ -23,13 +23,9 @@ jobs:
           echo '--- LIST OF FILES ---';
           ls -al;
           echo '--- GIT INFORMATION ---'
-          git co dev;
+          git co master;
           git pull;
-          echo '--- DOCKER OPERATIONS ---';
-          docker-compose down;
           echo '--- LIST OF DOCKER CONTAINERS AFTER STOPING DOCKER CONTAINERS ---';
-          docker ps;
           docker compose up -d --build;
-          docker system prune --all --force;
           echo '--- LIST OF DOCKER CONTAINERS AFTER STARTING DOCKER CONTAINERS ---';
           docker ps;
