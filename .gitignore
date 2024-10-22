@@ -16,5 +16,3 @@ pg_data/
 .vscode/
 .idea/
 *.sublime-*
-
-/ssh_agent.sock

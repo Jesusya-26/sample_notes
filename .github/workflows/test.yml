@@ -1,30 +1,35 @@
+
 name: test
 
-env:
-  # Use the same ssh-agent socket value across all jobs
-  # Useful when a GH action is using SSH behind-the-scenes
-  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    # Start ssh-agent but set it to use the same ssh_auth_sock value.
-    # The agent will be running in all steps after this, so it
-    # should be one of the first.
-    - name: Setup SSH passphrase
-      env:
-        SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
-        SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
-      run: |
-        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-        echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
-        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
-
-    # Debug print out the added identities. This will prove SSH_AUTH_SOCK
-    # is persisted across job steps
-    - name: Print ssh-add identities
-      run: ssh-add -l
+    - name: Run command on remote server
+      uses: D3rHase/ssh-command-action@v0.2.2
+      with:
+        host: ${{secrets.SSH_HOST}}
+        user: ${{secrets.SSH_USER}}
+        private_key: ${{secrets.SSH_PRIVATE_KEY}}
+        command: |
+          echo '--- START WORK ON REMOTE SERVER ---';
+          cd ${{ secrets.PROJECT_FOLDER }};
+          echo '--- LIST OF FILES ---';
+          ls -al;
+          echo '--- GIT INFORMATION ---'
+          git co dev;
+          git pull;
+          echo '--- DOCKER OPERATIONS ---';
+          docker-compose down;
+          echo '--- LIST OF DOCKER CONTAINERS AFTER STOPING DOCKER CONTAINERS ---';
+          docker ps;
+          docker-compose up -d --build;
+          docker system prune --all --force;
+          echo '--- LIST OF DOCKER CONTAINERS AFTER STARTING DOCKER CONTAINERS ---';
+          docker ps;
