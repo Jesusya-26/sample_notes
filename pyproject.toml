@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "test_fastapi"
+name = "sample_notes"
 version = "0.1.0"
 description = "This is a simple note-taking service"
 authors = ["Babayev Ruslan <rusl.babae@yandex.ru>"]

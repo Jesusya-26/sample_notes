@@ -4,8 +4,6 @@ services:
     container_name: ${POSTGRES_CONTAINER_NAME:-notes_db}
     image: library/postgres:${KC_POSTGRES_IMAGE_TAG:-15}
     restart: on-failure
-    ports:
-      - ${POSTGRES_PORT:-5432}:5432
     env_file:
       - ./db.env
     volumes:
