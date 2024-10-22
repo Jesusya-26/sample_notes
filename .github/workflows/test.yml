@@ -1,34 +1,34 @@
-name: test
+name: Deploy to Server
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - main
 
 jobs:
-  build-and-push:
+  deploy:
+    name: Deploy Application
     runs-on: ubuntu-latest
+
     steps:
-    - name: Run command on remote server
-      uses: D3rHase/ssh-command-action@v0.2.2
-      with:
-        host: ${{secrets.SSH_HOST}}
-        user: ${{secrets.SSH_USER}}
-        private_key: ${{secrets.SSH_PRIVATE_KEY}}
-        command: |
-          echo '--- START WORK ON REMOTE SERVER ---';
-          cd ${{ secrets.PROJECT_FOLDER }};
-          echo '--- LIST OF FILES ---';
-          ls -al;
-          echo '--- GIT INFORMATION ---'
-          git co dev;
-          git pull;
-          echo '--- DOCKER OPERATIONS ---';
-          docker-compose down;
-          echo '--- LIST OF DOCKER CONTAINERS AFTER STOPING DOCKER CONTAINERS ---';
-          docker ps;
-          docker-compose --file docker-compose.prod.yml up -d;
-          docker system prune --all --force;
-          echo '--- LIST OF DOCKER CONTAINERS AFTER STARTING DOCKER CONTAINERS ---';
-          docker ps;
+      # 1. Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Set up SSH
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # 3. Deploy to the remote server
+      - name: Deploy to Remote Server
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ${{ secrets.PROJECT_FOLDER }}
+            sudo git pull
+            sudo docker compose up -d --build
+          EOF
