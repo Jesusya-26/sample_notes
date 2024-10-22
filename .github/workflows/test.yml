@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: test
 
 on:
   push:
@@ -23,6 +23,6 @@ jobs:
             cd ${{ secrets.PROJECT_FOLDER }};
             git checkout main;
             git pull;
-            docker-compose --file docker-compose.prod.yml down;
-            docker-compose --file docker-compose.prod.yml up -d;
+            docker-compose down;
+            docker-compose up -d --build;
             docker system prune --all --force;
