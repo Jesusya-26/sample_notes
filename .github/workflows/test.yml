@@ -1,32 +1,31 @@
-name: Build & Deploy
-on:
-  push:
-    branches:
-      - master
+name: ssh with passphrase example
+
+env:
+  # Use the same ssh-agent socket value across all jobs
+  # Useful when a GH action is using SSH behind-the-scenes
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Pull New Changes
-        uses: appleboy/ssh-action@v0.1.5
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: 22
-          username: ${{ secrets.SSH_USER}}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ${{ secrets.PROJECT_DIR }}
-            git pull origin master
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Deploy Backend
-        uses: appleboy/ssh-action@v0.1.5
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: 22
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+    # Start ssh-agent but set it to use the same ssh_auth_sock value.
+    # The agent will be running in all steps after this, so it
+    # should be one of the first.
+    - name: Setup SSH passphrase
+      env:
+        SSH_PASSPHRASE: ${{secrets.SSH_PASSPHRASE}}
+        SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+      run: |
+        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+        echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
 
-          script: |
-            cd ${{ secrets.PROJECT_DIR }}
-            docker compose up -d --build
+    # Debug print out the added identities. This will prove SSH_AUTH_SOCK
+    # is persisted across job steps
+    - name: Print ssh-add identities
+      runs: ssh-add -l
