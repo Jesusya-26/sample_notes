@@ -1,4 +1,4 @@
-name: ssh with passphrase example
+name: test
 
 env:
   # Use the same ssh-agent socket value across all jobs
@@ -8,7 +8,6 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -28,4 +27,4 @@ jobs:
     # Debug print out the added identities. This will prove SSH_AUTH_SOCK
     # is persisted across job steps
     - name: Print ssh-add identities
-      runs: ssh-add -l
+      run: ssh-add -l
