@@ -23,7 +23,7 @@ cachetools = "^5.3.3"
 
 
 [tool.poetry.scripts]
-launch_notes_api = "test_fastapi.__main__:main"
+launch_notes_api = "sample_notes.__main__:main"
 
 
 [build-system]
